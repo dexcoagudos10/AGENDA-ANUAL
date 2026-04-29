@@ -55,9 +55,9 @@
         .filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .month-select { width: 100%; max-width: 250px; }
 
-        /* ======== CALENDÁRIO COM SCROLL HORIZONTAL ======== */
-        .calendar-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 15px; border-radius: 8px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #ddd; border: 1px solid #ddd; border-radius: 8px; min-width: 800px; }
+        /* ======== CALENDÁRIO ENQUADRADO ======== */
+        .calendar-wrapper { width: 100%; padding-bottom: 15px; border-radius: 8px; box-sizing: border-box; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #ddd; border: 1px solid #ddd; border-radius: 8px; width: 100%; box-sizing: border-box; }
         .cal-header { background: var(--primary); color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 0.9em; }
         .cal-day { background: white; min-height: 120px; padding: 8px; position: relative; }
         .cal-day.today { background: #e8f4fd; border: 2px solid var(--info); }
@@ -111,6 +111,13 @@
 
             .row-inputs { flex-direction: column; gap: 0; }
             .row-inputs .form-group { width: 100%; min-width: 100%; }
+
+            /* AJUSTES DO CALENDÁRIO PARA CELULAR (ENQUADRAMENTO) */
+            .cal-header { padding: 8px 2px; font-size: 0.65em; word-break: break-all; }
+            .cal-day { min-height: 80px; padding: 4px; }
+            .day-number { font-size: 0.85em; margin-bottom: 3px; }
+            .event-item { font-size: 0.55em; white-space: normal; word-wrap: break-word; padding: 3px; line-height: 1.1; }
+            .event-vendor { font-size: 0.8em; margin-top: 1px; }
 
             /* MÁGICA DO CARD VIEW DA TABELA PARA CELULAR */
             .table-wrapper { padding: 0; overflow: visible; }
