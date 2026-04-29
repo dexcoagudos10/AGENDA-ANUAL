@@ -41,6 +41,7 @@
         .btn { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-align: center; display: block; width: 100%; font-size: 0.95em; margin-bottom: 10px; box-sizing: border-box; }
         .btn-add { background: var(--success); color: white; }
         .btn-export { background: #2980b9; color: white; }
+        .btn-import { background: #8e44ad; color: white; }
         .btn-admin { background: var(--accent); color: white; }
         .btn-update { background: #3498db; color: white; }
         .btn-cancel { background: #95a5a6; color: white; font-size: 0.8em; padding: 8px; }
@@ -206,7 +207,11 @@
     <p style="font-size: 0.85em; opacity: 0.8; margin-bottom: 20px;">Pedro Vicente</p>
     
     <button class="btn btn-export" onclick="exportToExcel()">📥 Exportar Dados (Excel)</button>
-    <button class="btn btn-admin" id="adminBtn" onclick="toggleAdmin()">Ativar Modo Editor</button>
+    
+    <input type="file" id="fileImport" accept=".csv" style="display: none;" onchange="importFromExcel(event)">
+    <button class="btn btn-import" onclick="document.getElementById('fileImport').click()">📤 Importar Backup</button>
+    
+    <button class="btn btn-admin" id="adminBtn" style="margin-top: 15px;" onclick="toggleAdmin()">Ativar Modo Editor</button>
     
     <div class="card admin-only" style="margin-top: 20px; background: rgba(255,255,255,0.05); padding: 15px;">
         <h3 id="formTitle">Nova Reserva</h3>
@@ -375,7 +380,7 @@
             });
         }
         
-        if (tableSelect.options.length === 1) { // Só carrega se estiver vazio (apenas "Todos os Meses")
+        if (tableSelect.options.length === 1) { 
             months.forEach((m, i) => {
                 let opt = document.createElement('option');
                 opt.value = i;
@@ -517,7 +522,6 @@
         const selMonth = tableMonthVal === 'all' ? 'all' : parseInt(tableMonthVal);
         const btnPast = document.getElementById('togglePastBtn');
 
-        // Se escolher um mês específico, esconde o botão de viagens antigas para não dar conflito lógico
         if (selMonth !== 'all') {
             btnPast.style.display = 'none';
         } else {
@@ -528,7 +532,6 @@
         let countPendentes = 0;
         let countPagos = 0;
 
-        // FILTRAGEM ROBUSTA: Define exatamente quais viagens vão aparecer na tabela
         let viagensParaExibir = travels.filter(t => {
             const [iY, iM, iD] = t.ida.split('-');
             const dataIda = new Date(iY, iM - 1, iD);
@@ -540,7 +543,6 @@
 
             const isPast = Math.floor((today - dataVolta) / 86400000) > 0;
 
-            // 1. Se escolheu um Mês Específico: Mostra só o que acontece nesse mês, e ignora o resto
             if (selMonth !== 'all') {
                 if (dataIda.getMonth() === selMonth || dataVolta.getMonth() === selMonth) {
                     return true; 
@@ -548,7 +550,6 @@
                 return false; 
             }
 
-            // 2. Se está em "Todos os Meses": Aplica a trava do botão de Ocultar Anteriores
             if (hidePastTrips && isPast) {
                 return false;
             }
@@ -556,7 +557,6 @@
             return true;
         });
 
-        // RENDERIZAÇÃO: Monta a tabela apenas com as viagens aprovadas no filtro acima
         viagensParaExibir.sort((a,b) => new Date(a.ida) - new Date(b.ida)).forEach(t => {
             const [iY, iM, iD] = t.ida.split('-');
             const dataIda = new Date(iY, iM - 1, iD);
@@ -634,7 +634,6 @@
                 </tr>`;
         });
 
-        // Atualiza o painel de finanças com as informações apenas do que está aparecendo na tabela
         document.getElementById('count-atrasados').innerText = countAtrasados;
         document.getElementById('count-pendentes').innerText = countPendentes;
         document.getElementById('count-pagos').innerText = countPagos;
@@ -653,6 +652,64 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // NOVA FUNÇÃO: LER O FICHEIRO E IMPORTAR
+    function importFromExcel(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            // Remove caracteres invisíveis do início (BOM) se existirem
+            const cleanText = text.replace(/^\uFEFF/, '');
+            const lines = cleanText.split('\n').filter(line => line.trim() !== '');
+
+            let newTravels = [];
+            
+            // Pula a primeira linha (cabeçalho) e começa do 1
+            for (let i = 1; i < lines.length; i++) {
+                let line = lines[i].trim();
+                
+                // Remove aspas do começo e do fim da linha, se houver
+                if (line.startsWith('"') && line.endsWith('"')) {
+                    line = line.substring(1, line.length - 1);
+                }
+                
+                // Corta exatamente onde tem a divisa ","
+                const cols = line.split('","');
+
+                if (cols.length >= 9) {
+                    newTravels.push({
+                        id: Date.now() + i, // Cria um novo ID único para cada registo
+                        dest: cols[0],
+                        vendor: cols[1],
+                        type: cols[2],
+                        ida: cols[3],
+                        volta: cols[4],
+                        voo: cols[5],
+                        hotel: cols[6],
+                        nota: cols[7],
+                        pago: cols[8]
+                    });
+                }
+            }
+
+            if (newTravels.length > 0) {
+                if(confirm("⚠️ ATENÇÃO: Isso vai APAGAR os dados que estão agora na tela e substituí-los pelo backup selecionado.\n\nDeseja continuar?")) {
+                    travels = newTravels;
+                    saveData(); // Função que salva no localStorage e recarrega a tela
+                    alert("✅ Backup restaurado com sucesso!");
+                }
+            } else {
+                alert("❌ Arquivo inválido ou vazio. Por favor, use apenas o arquivo gerado pelo botão de exportar.");
+            }
+            
+            event.target.value = ''; // Limpa o input para poder importar o mesmo ficheiro de novo se precisar
+        };
+        
+        reader.readAsText(file, 'UTF-8');
     }
 
     initDashboard();
