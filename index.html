@@ -19,8 +19,8 @@
 
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--bg); margin: 0; color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
         
-        .sidebar { width: 340px; background: var(--primary); color: white; padding: 25px; position: fixed; height: 100vh; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.1); box-sizing: border-box; }
-        .main-content { margin-left: 340px; padding: 40px; flex-grow: 1; box-sizing: border-box; }
+        .sidebar { width: 340px; background: var(--primary); color: white; padding: 25px; position: fixed; height: 100vh; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.1); box-sizing: border-box; z-index: 100; }
+        .main-content { margin-left: 340px; padding: 30px; flex-grow: 1; box-sizing: border-box; width: calc(100% - 340px); }
 
         h1, h2, h3 { margin-top: 0; color: var(--primary); }
         .sidebar h2, .sidebar h3 { color: white; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
@@ -32,8 +32,8 @@
         label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.85em; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 0.9em; }
         
-        .row-inputs { display: flex; gap: 8px; }
-        .row-inputs .form-group { width: 50%; }
+        .row-inputs { display: flex; gap: 8px; flex-wrap: wrap; }
+        .row-inputs .form-group { flex: 1; min-width: 48%; }
 
         .btn { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-align: center; display: block; width: 100%; font-size: 0.95em; margin-bottom: 10px; }
         .btn-add { background: var(--success); color: white; }
@@ -43,18 +43,18 @@
         .btn-cancel { background: #95a5a6; color: white; font-size: 0.8em; padding: 8px; }
 
         /* Dashboard Financeiro */
-        .dash-fin { display: flex; gap: 20px; margin-bottom: 20px; }
-        .dash-card { flex: 1; padding: 15px; border-radius: 8px; color: white; font-weight: bold; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .dash-fin { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .dash-card { flex: 1; min-width: 220px; padding: 15px; border-radius: 8px; color: white; font-weight: bold; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .dash-danger { background: var(--danger); }
         .dash-warning { background: var(--warning); color: #333; }
         .dash-success { background: var(--success); }
 
-        .filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .month-select { width: 250px; }
+        .filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .month-select { width: 100%; max-width: 250px; }
 
         .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; background: #ddd; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
         .cal-header { background: var(--primary); color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 0.9em; }
-        .cal-day { background: white; min-height: 130px; padding: 8px; position: relative; min-width: 0; overflow: hidden; }
+        .cal-day { background: white; min-height: 110px; padding: 8px; position: relative; min-width: 0; overflow: hidden; }
         .cal-day.today { background: #e8f4fd; }
         .day-number { font-weight: bold; font-size: 1em; margin-bottom: 6px; display: block; }
         
@@ -64,8 +64,9 @@
         .event-ok { background: var(--success); }
         .event-vendor { font-style: italic; opacity: 0.9; display: block; font-size: 0.85em; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
-        th { text-align: left; padding: 12px; background: #eee; color: var(--primary); font-weight: 600; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; min-width: 800px; }
+        th { text-align: left; padding: 12px; background: #eee; color: var(--primary); font-weight: 600; white-space: nowrap; }
         td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
         .row-critical { background-color: #fff5f5; border-left: 4px solid var(--danger); }
         .row-finance-alert { background-color: #fdf2e9; border-left: 4px solid var(--accent); }
@@ -76,20 +77,43 @@
         
         .alert-text { color: var(--danger); font-weight: bold; font-size: 0.85em; display: block; margin-top: 5px; }
 
-        .admin-controls { display: none; margin-top: 5px; gap: 5px; }
+        .admin-controls { display: none; margin-top: 5px; gap: 4px; flex-wrap: wrap; }
         body.admin-mode .admin-controls { display: flex; }
         .admin-only { display: none; }
         body.admin-mode .admin-only { display: block; }
 
-        .btn-status { padding: 4px 6px; font-size: 0.7em; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 3px; }
+        .btn-status { padding: 4px 6px; font-size: 0.7em; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 3px; flex: 1; min-width: 25px; text-align: center;}
         .btn-status.active { background: var(--primary); color: white; }
         .btn-action { background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 4px; }
 
         .col-divider { border-left: 2px solid #eee; }
 
+        /* ======== REGRAS DE RESPONSIVIDADE (CELULARES E TABLETS) ======== */
         @media (max-width: 1000px) {
-            .sidebar { width: 100%; height: auto; position: relative; }
-            .main-content { margin-left: 0; padding: 20px; }
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: relative; padding: 20px; box-shadow: none; border-bottom: 3px solid var(--primary); }
+            .main-content { margin-left: 0; padding: 15px; width: 100%; }
+        }
+
+        @media (max-width: 768px) {
+            .dash-fin { flex-direction: column; gap: 10px; }
+            .dash-card { min-width: 100%; padding: 12px; }
+            
+            .filter-bar h2 { font-size: 1.2em; margin-bottom: 5px; }
+            
+            .calendar-grid { font-size: 0.85em; }
+            .cal-header { padding: 6px 2px; font-size: 0.8em; }
+            .cal-day { min-height: 80px; padding: 4px; }
+            .event-item { font-size: 0.65em; padding: 2px; }
+            .day-number { font-size: 0.9em; margin-bottom: 3px; }
+
+            .row-inputs { flex-direction: column; gap: 0; }
+            .row-inputs .form-group { width: 100%; min-width: 100%; }
+
+            /* Ajustes finos na tabela para mobile */
+            th, td { padding: 8px 6px; font-size: 0.95em; }
+            .badge { padding: 3px 6px; font-size: 0.8em; }
+            .admin-controls { flex-direction: column; align-items: stretch; } /* Botões S/N um debaixo do outro */
         }
     </style>
 </head>
@@ -164,22 +188,24 @@
     <div class="calendar-grid" id="calendarGrid"></div>
 
     <h2 style="margin-top: 40px;">Cronograma Anual de Viagens (2026)</h2>
-    <div class="card" style="padding: 0; overflow-x: auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th>Local</th>
-                    <th>Vendedor</th>
-                    <th>Período</th>
-                    <th class="col-divider">Voo</th>
-                    <th>Hotel</th>
-                    <th class="col-divider" style="color: var(--accent);">Nota Fiscal</th>
-                    <th style="color: var(--accent);">Pagamento SLA</th>
-                    <th class="admin-only">Ações</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
+    <div class="card" style="padding: 0;">
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Local</th>
+                        <th>Vendedor</th>
+                        <th>Período</th>
+                        <th class="col-divider">Voo</th>
+                        <th>Hotel</th>
+                        <th class="col-divider" style="color: var(--accent);">Nota Fiscal</th>
+                        <th style="color: var(--accent);">Pagamento SLA</th>
+                        <th class="admin-only">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -187,7 +213,7 @@
     const SENHA_ADMIN = "duratex2026"; 
     let editingId = null;
 
-    // Nova base de dados cruzada: Traz os STATUS REAIS de VOO e HOTEL + Vendedor/Evento
+    // Utilizando a mesma chave de base de dados para garantir que não perde nenhuma alteração
     let rawTravels = JSON.parse(localStorage.getItem('pedro_viagens_v8')) || [
   { "id": 1, "dest": "VISITAS", "vendor": "", "type": "TCD", "ida": "2026-02-09", "volta": "2026-02-11", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
   { "id": 2, "dest": "PLANEJAMENTO", "vendor": "", "type": "TCD", "ida": "2026-02-16", "volta": "2026-02-20", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
@@ -297,6 +323,7 @@
         document.getElementById('formTitle').innerText = "Editar Registo";
         document.getElementById('saveBtn').innerText = "Atualizar";
         document.getElementById('cancelBtn').style.display = "block";
+        window.scrollTo(0,0);
     }
 
     function cancelEdit() {
@@ -398,7 +425,7 @@
                 <tr class="${rowClass}">
                     <td><strong>${t.dest}</strong><br><small>[${t.type || 'TCD'}]</small></td>
                     <td>${t.vendor || '-'}</td>
-                    <td>${t.ida.split('-').reverse().join('/')} <br> ${t.volta.split('-').reverse().join('/')}</td>
+                    <td style="white-space: nowrap;">${t.ida.split('-').reverse().join('/')} <br> ${t.volta.split('-').reverse().join('/')}</td>
                     
                     <td class="col-divider">
                         <span class="badge ${t.voo==='S'?'badge-s':'badge-n'}">${t.voo}</span>
