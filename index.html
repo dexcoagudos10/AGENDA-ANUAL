@@ -41,9 +41,13 @@
         .btn { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-align: center; display: block; width: 100%; font-size: 0.95em; margin-bottom: 10px; box-sizing: border-box; }
         .btn-add { background: var(--success); color: white; }
         .btn-export { background: #2980b9; color: white; }
+        .btn-import { background: #8e44ad; color: white; }
         .btn-admin { background: var(--accent); color: white; }
         .btn-update { background: #3498db; color: white; }
         .btn-cancel { background: #95a5a6; color: white; font-size: 0.8em; padding: 8px; }
+
+        .action-buttons-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .action-buttons-row .btn { margin-bottom: 0; padding: 10px; font-size: 0.85em; }
 
         /* Dashboard Financeiro */
         .dash-fin { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
@@ -153,7 +157,13 @@
     <h2>Duratex | Admin</h2>
     <p style="font-size: 0.85em; opacity: 0.8; margin-bottom: 20px;">Pedro Vicente</p>
     
-    <button class="btn btn-export" onclick="exportToExcel()">📥 Exportar Dados (Excel)</button>
+    <div class="action-buttons-row">
+        <button class="btn btn-export" onclick="exportToExcel()">📥 Exportar</button>
+        <button class="btn btn-import" onclick="document.getElementById('fileImport').click()">📤 Importar</button>
+    </div>
+    
+    <input type="file" id="fileImport" accept="*/*" style="display: none;" onchange="importFromExcel(event)">
+    
     <button class="btn btn-admin" id="adminBtn" style="margin-top: 10px;" onclick="toggleAdmin()">Ativar Modo Editor</button>
     
     <div class="card admin-only" style="margin-top: 20px; background: rgba(255,255,255,0.05); padding: 15px;">
@@ -559,6 +569,75 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // Leitor inteligente e robusto para qualquer CSV
+    function importFromExcel(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const cleanText = text.replace(/^\uFEFF/, '');
+            const lines = cleanText.split('\n').filter(line => line.trim() !== '');
+
+            let newTravels = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if(!line) continue;
+                
+                let separador = line.includes(';') ? ';' : ',';
+                let cols = [];
+                let cur = '';
+                let inQuotes = false;
+                
+                for(let j=0; j<line.length; j++) {
+                    let c = line[j];
+                    if(inQuotes) {
+                        if(c === '"') {
+                            if(j+1 < line.length && line[j+1] === '"') { cur += '"'; j++; } 
+                            else inQuotes = false;
+                        } else cur += c;
+                    } else {
+                        if(c === '"') inQuotes = true;
+                        else if(c === separador) { cols.push(cur.trim()); cur = ''; }
+                        else cur += c;
+                    }
+                }
+                cols.push(cur.trim());
+
+                if (cols.length >= 9) {
+                    newTravels.push({
+                        id: Date.now() + i,
+                        dest: cols[0] || 'A DEFINIR',
+                        vendor: cols[1] || '',
+                        type: cols[2] || 'TCD',
+                        ida: cols[3],
+                        volta: cols[4],
+                        voo: cols[5] || 'N',
+                        hotel: cols[6] || 'N',
+                        nota: cols[7] || 'N',
+                        pago: cols[8] || 'N'
+                    });
+                }
+            }
+
+            if (newTravels.length > 0) {
+                if(confirm("⚠️ ATENÇÃO: Isso vai APAGAR os dados atuais e substituí-los pelo backup selecionado.\n\nDeseja continuar?")) {
+                    travels = newTravels;
+                    saveData(); 
+                    alert("✅ Backup restaurado com sucesso! " + newTravels.length + " viagens foram carregadas.");
+                }
+            } else {
+                alert("❌ O arquivo parece vazio ou num formato irreconhecível.");
+            }
+            
+            event.target.value = ''; 
+        };
+        
+        reader.readAsText(file, 'UTF-8');
     }
 
     initDashboard();
