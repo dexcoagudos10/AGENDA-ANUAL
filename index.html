@@ -57,10 +57,10 @@
 
         /* ======== CALENDÁRIO COM SCROLL HORIZONTAL ======== */
         .calendar-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 15px; border-radius: 8px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #ddd; border: 1px solid #ddd; border-radius: 8px; min-width: 800px; /* Força o tamanho minimo para nunca esmagar */ }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #ddd; border: 1px solid #ddd; border-radius: 8px; min-width: 800px; }
         .cal-header { background: var(--primary); color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 0.9em; }
         .cal-day { background: white; min-height: 120px; padding: 8px; position: relative; }
-        .cal-day.today { background: #e8f4fd; }
+        .cal-day.today { background: #e8f4fd; border: 2px solid var(--info); }
         .day-number { font-weight: bold; font-size: 1em; margin-bottom: 6px; display: block; }
         
         .event-item { font-size: 0.7em; padding: 4px 6px; border-radius: 4px; margin-bottom: 3px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
@@ -93,6 +93,8 @@
         .btn-action { background: var(--primary); color: white; border: none; cursor: pointer; font-size: 0.8em; padding: 6px 12px; border-radius: 4px; }
 
         .col-divider { border-left: 2px solid #eee; }
+        
+        .table-header-row { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
 
         /* ======== REGRAS DE RESPONSIVIDADE PARA TELEMÓVEIS ======== */
         @media (max-width: 1000px) {
@@ -113,7 +115,7 @@
             /* MÁGICA DO CARD VIEW DA TABELA PARA CELULAR */
             .table-wrapper { padding: 0; overflow: visible; }
             table { width: 100%; display: block; background: transparent; min-width: auto; }
-            thead { display: none; } /* Esconde o cabeçalho no telemóvel */
+            thead { display: none; }
             tbody { display: block; width: 100%; }
             
             tr { 
@@ -142,7 +144,6 @@
             }
             td:last-child { border-bottom: none; }
             
-            /* Nome da coluna gerado automaticamente à esquerda */
             td::before { 
                 content: attr(data-label); 
                 font-weight: bold; 
@@ -161,6 +162,9 @@
             .col-divider { border-left: none; }
             
             .card { padding: 10px; background: transparent; box-shadow: none; margin-bottom: 0; }
+            
+            .table-header-row h2 { font-size: 1.1em; margin: 0; }
+            .table-header-row button { width: 100%; }
         }
     </style>
 </head>
@@ -236,7 +240,11 @@
         <div class="calendar-grid" id="calendarGrid"></div>
     </div>
 
-    <h2 style="margin-top: 40px; font-size: 1.2em;">Cronograma Anual de Viagens (2026)</h2>
+    <div class="table-header-row">
+        <h2 style="margin: 0;">Cronograma de Viagens (2026)</h2>
+        <button id="togglePastBtn" class="btn btn-cancel" style="width: auto; margin: 0; padding: 10px 15px; font-size: 0.85em;" onclick="togglePastTrips()">👁️ Exibir Viagens Anteriores</button>
+    </div>
+    
     <div class="card" style="padding:0;">
         <div class="table-wrapper">
             <table>
@@ -261,12 +269,12 @@
 <script>
     const SENHA_ADMIN = "duratex2026"; 
     let editingId = null;
+    let hidePastTrips = true; // Variável que controla a exibição das viagens passadas
 
     // Chave v9 FORÇA o carregamento caso esteja vazio
     let storedData = localStorage.getItem('pedro_viagens_v9');
     let parsedData = storedData ? JSON.parse(storedData) : [];
 
-    // Base de dados Oficial - Carrega sempre que a memória do navegador estiver vazia
     let defaultTravels = [
   { "id": 1, "dest": "VISITAS", "vendor": "", "type": "TCD", "ida": "2026-02-09", "volta": "2026-02-11", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
   { "id": 2, "dest": "PLANEJAMENTO", "vendor": "", "type": "TCD", "ida": "2026-02-16", "volta": "2026-02-20", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
@@ -330,6 +338,20 @@
             });
         }
         renderCalendar();
+        renderTable();
+    }
+
+    // Função que alterna a visibilidade das viagens passadas
+    function togglePastTrips() {
+        hidePastTrips = !hidePastTrips;
+        const btn = document.getElementById('togglePastBtn');
+        if (hidePastTrips) {
+            btn.innerHTML = "👁️ Exibir Viagens Anteriores";
+            btn.className = "btn btn-cancel";
+        } else {
+            btn.innerHTML = "🙈 Ocultar Viagens Anteriores";
+            btn.className = "btn btn-update";
+        }
         renderTable();
     }
 
@@ -413,15 +435,19 @@
 
         const firstDay = new Date(year, selMonth, 1).getDay();
         const lastDay = new Date(year, selMonth + 1, 0).getDate();
+        
+        const todayStr = new Date().toISOString().split('T')[0];
 
         for(let i=0; i<firstDay; i++) grid.innerHTML += `<div class="cal-day" style="background:#eee"></div>`;
 
         for(let d=1; d<=lastDay; d++) {
             const dateStr = `${year}-${String(selMonth+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            let dayHtml = `<div class="cal-day"><strong>${d}</strong>`;
+            const isToday = todayStr === dateStr;
+            let dayHtml = `<div class="cal-day ${isToday ? 'today' : ''}"><strong>${d}</strong>`;
             
             travels.filter(t => dateStr >= t.ida && dateStr <= t.volta).forEach(e => {
-                const diff = (new Date(e.ida) - new Date()) / 86400000;
+                const dataIdaTime = new Date(e.ida.split('-')[0], e.ida.split('-')[1]-1, e.ida.split('-')[2]);
+                const diff = (dataIdaTime - new Date()) / 86400000;
                 const isCritical = diff >= 0 && diff < 30 && (e.voo==='N' || e.hotel==='N');
                 const statusClass = isCritical ? 'event-critical' : (e.voo==='S'&&e.hotel==='S'?'event-ok':'event-pending');
                 
@@ -446,17 +472,26 @@
         let countPagos = 0;
 
         travels.sort((a,b) => new Date(a.ida) - new Date(b.ida)).forEach(t => {
-            const diffLogistica = (new Date(t.ida) - today) / 86400000;
+            
+            // Lemos as datas ignorando os fusos horários da máquina
+            const [iY, iM, iD] = t.ida.split('-');
+            const dataIda = new Date(iY, iM - 1, iD);
+            dataIda.setHours(0,0,0,0);
+            
+            const [vY, vM, vD] = t.volta.split('-');
+            const dataVolta = new Date(vY, vM - 1, vD);
+            dataVolta.setHours(0,0,0,0);
+
+            const diffLogistica = (dataIda - today) / 86400000;
             const isLogisticaCritical = diffLogistica >= 0 && diffLogistica < 30 && (t.voo==='N' || t.hotel==='N');
             
-            const dataVolta = new Date(t.volta);
-            dataVolta.setHours(0,0,0,0);
             const diasPosEvento = Math.floor((today - dataVolta) / 86400000);
+            const isPast = diasPosEvento > 0; // Se os dias após a volta forem maiores que zero, a viagem já acabou
             
             let isFinanceiroLate = false;
             let statusFinanceiro = "-";
 
-            if (diasPosEvento > 0) {
+            if (isPast) {
                 if (t.pago === 'S') {
                     countPagos++;
                     statusFinanceiro = "<span style='color:green;'>Finalizado</span>";
@@ -470,6 +505,11 @@
                 }
             } else {
                 statusFinanceiro = "<span style='color:#7f8c8d; font-size: 0.9em;'>Aguardando Evento</span>";
+            }
+
+            // Ocultar da tabela se a viagem for do passado e a opção de ocultar estiver ativada
+            if (hidePastTrips && isPast) {
+                return; // Pula a renderização da linha, mas os contadores lá em cima continuam certos!
             }
 
             let rowClass = "";
