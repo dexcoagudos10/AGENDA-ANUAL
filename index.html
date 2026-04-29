@@ -17,7 +17,7 @@
             --text: #333;
         }
 
-        /* Trava global para impedir que a página estique lateralmente no telemóvel */
+        /* Bloqueia o scroll horizontal indesejado no mobile */
         html, body { max-width: 100vw; overflow-x: hidden; }
 
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--bg); margin: 0; color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
@@ -38,7 +38,7 @@
         .row-inputs { display: flex; gap: 8px; flex-wrap: wrap; }
         .row-inputs .form-group { flex: 1; min-width: 48%; }
 
-        .btn { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-align: center; display: block; width: 100%; font-size: 0.95em; margin-bottom: 10px; }
+        .btn { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-align: center; display: block; width: 100%; font-size: 0.95em; margin-bottom: 10px; box-sizing: border-box; }
         .btn-add { background: var(--success); color: white; }
         .btn-export { background: #2980b9; color: white; }
         .btn-admin { background: var(--accent); color: white; }
@@ -47,7 +47,7 @@
 
         /* Dashboard Financeiro */
         .dash-fin { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
-        .dash-card { flex: 1; min-width: 220px; padding: 15px; border-radius: 8px; color: white; font-weight: bold; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .dash-card { flex: 1; min-width: 200px; padding: 15px; border-radius: 8px; color: white; font-weight: bold; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .dash-danger { background: var(--danger); }
         .dash-warning { background: var(--warning); color: #333; }
         .dash-success { background: var(--success); }
@@ -55,22 +55,22 @@
         .filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .month-select { width: 100%; max-width: 250px; }
 
-        /* Calendário */
-        .calendar-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(100px, 1fr)); gap: 2px; background: #ddd; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; min-width: 750px; }
-        .cal-header { background: var(--primary); color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 0.9em; }
-        .cal-day { background: white; min-height: 110px; padding: 8px; position: relative; min-width: 0; overflow: hidden; }
+        /* Calendário (Flexível) */
+        .calendar-wrapper { width: 100%; padding-bottom: 10px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; background: #ddd; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+        .cal-header { background: var(--primary); color: white; padding: 12px 5px; text-align: center; font-weight: bold; font-size: 0.9em; }
+        .cal-day { background: white; min-height: 110px; padding: 6px; position: relative; min-width: 0; overflow: hidden; }
         .cal-day.today { background: #e8f4fd; }
         .day-number { font-weight: bold; font-size: 1em; margin-bottom: 6px; display: block; }
         
-        .event-item { font-size: 0.7em; padding: 3px 6px; border-radius: 4px; margin-bottom: 3px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .event-item { font-size: 0.7em; padding: 3px 4px; border-radius: 4px; margin-bottom: 3px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
         .event-critical { background: var(--danger); }
         .event-pending { background: var(--warning); color: #333; }
         .event-ok { background: var(--success); }
         .event-vendor { font-style: italic; opacity: 0.9; display: block; font-size: 0.85em; }
 
         /* Tabela Normal (Computador) */
-        .table-wrapper { width: 100%; overflow-x: auto; border-radius: 8px; }
+        .table-wrapper { width: 100%; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85em; background: white; }
         th { text-align: left; padding: 12px; background: #eee; color: var(--primary); font-weight: 600; white-space: nowrap; }
         td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
@@ -97,8 +97,8 @@
         /* ======== REGRAS DE RESPONSIVIDADE PARA TELEMÓVEIS ======== */
         @media (max-width: 1000px) {
             body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; position: relative; padding: 20px; box-shadow: none; border-bottom: 3px solid var(--primary); }
-            .main-content { margin-left: 0; padding: 15px; width: 100%; overflow-x: hidden; }
+            .sidebar { width: 100%; height: auto; position: relative; padding: 20px; border-bottom: 3px solid var(--primary); z-index: 10; }
+            .main-content { margin-left: 0; padding: 15px; width: 100%; box-sizing: border-box; }
             
             .dash-fin { flex-direction: column; gap: 10px; }
             .dash-card { min-width: 100%; padding: 12px; }
@@ -110,48 +110,64 @@
             .row-inputs { flex-direction: column; gap: 0; }
             .row-inputs .form-group { width: 100%; min-width: 100%; }
 
-            /* MÁGICA DO CARD VIEW DA TABELA PARA CELULAR */
-            .table-wrapper { overflow: visible; padding: 0; }
-            table { border: none; background: transparent; }
-            table thead { display: none; /* Esconde o cabeçalho no celular */ }
-            table tr { 
+            /* Calendário Ajuste Mobile */
+            .cal-header { font-size: 0.7em; padding: 8px 2px; }
+            .cal-day { min-height: 80px; padding: 3px; }
+            .day-number { font-size: 0.9em; margin-bottom: 3px; }
+            .event-item { font-size: 0.6em; padding: 2px; }
+            .event-vendor { display: none; } /* Esconde o nome do vendedor no mobile para poupar espaço no calendário */
+
+            /* CARTÕES (CARD VIEW) DA TABELA PARA CELULAR */
+            .table-wrapper { padding: 0; overflow: hidden; }
+            table { width: 100%; display: block; background: transparent; }
+            thead { display: none; }
+            tbody { display: block; width: 100%; }
+            
+            tr { 
                 display: block; 
+                width: 100%; 
                 background: #fff; 
-                margin-bottom: 20px; 
+                margin-bottom: 15px; 
                 border-radius: 8px; 
-                box-shadow: 0 3px 10px rgba(0,0,0,0.1); 
-                border: 1px solid #eee; 
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+                border: 1px solid #ddd; 
                 border-left: 5px solid #ccc; 
-                padding: 5px 0; 
+                box-sizing: border-box;
             }
             .row-critical { border-left: 5px solid var(--danger); }
             .row-finance-alert { border-left: 5px solid var(--accent); }
             
-            table td { 
+            td { 
                 display: flex; 
                 justify-content: space-between; 
                 align-items: center; 
                 border-bottom: 1px solid #f5f5f5; 
-                padding: 10px 15px; 
+                padding: 10px 12px; 
                 text-align: right; 
+                width: 100%;
+                box-sizing: border-box;
             }
-            table td:last-child { border-bottom: none; }
-            table td::before { 
-                content: attr(data-label); /* Usa o nome da coluna definido no HTML */
+            td:last-child { border-bottom: none; }
+            
+            /* Nome da coluna gerado pelo CSS (data-label) */
+            td::before { 
+                content: attr(data-label); 
                 font-weight: bold; 
                 color: var(--primary); 
                 font-size: 0.85em; 
                 text-transform: uppercase; 
-                margin-right: 15px; 
+                margin-right: 10px; 
                 text-align: left;
+                flex-shrink: 0;
             }
             
-            table td > div { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+            td > div { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
             .admin-controls { flex-direction: row; width: auto; justify-content: flex-end; }
-            .badge { min-width: 60px; text-align: center; margin-bottom: 5px; }
+            .badge { min-width: 60px; text-align: center; margin-bottom: 3px; }
             .alert-text { font-size: 0.75em; text-align: right; white-space: normal; }
+            .col-divider { border-left: none; } /* Remove borda da tabela no modo mobile */
             
-            .card { padding: 10px; background: transparent; box-shadow: none; }
+            .card { padding: 10px; background: transparent; box-shadow: none; margin-bottom: 0; }
         }
     </style>
 </head>
@@ -228,7 +244,7 @@
     </div>
 
     <h2 style="margin-top: 40px; font-size: 1.2em;">Cronograma Anual de Viagens (2026)</h2>
-    <div class="card">
+    <div class="card" style="padding:0;">
         <div class="table-wrapper">
             <table>
                 <thead>
@@ -253,7 +269,47 @@
     const SENHA_ADMIN = "duratex2026"; 
     let editingId = null;
 
-    let rawTravels = JSON.parse(localStorage.getItem('pedro_viagens_v8')) || [];
+    let rawTravels = JSON.parse(localStorage.getItem('pedro_viagens_v8')) || [
+  { "id": 1, "dest": "VISITAS", "vendor": "", "type": "TCD", "ida": "2026-02-09", "volta": "2026-02-11", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 2, "dest": "PLANEJAMENTO", "vendor": "", "type": "TCD", "ida": "2026-02-16", "volta": "2026-02-20", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 3, "dest": "Convenção Comercial", "vendor": "", "type": "TCD", "ida": "2026-02-24", "volta": "2026-02-26", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 4, "dest": "MESTRE MARCENEIRO SJC (AC GABRIEL)", "vendor": "NOCE", "type": "TCD", "ida": "2026-03-03", "volta": "2026-03-05", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 5, "dest": "REVESTIR", "vendor": "", "type": "TCD", "ida": "2026-03-12", "volta": "2026-03-14", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 6, "dest": "GRUPO PARANAENSE MAD SET (AC LUCIANO)", "vendor": "KLEVER", "type": "TCD", "ida": "2026-03-17", "volta": "2026-03-19", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 7, "dest": "RUDEGON MATRIZ (AC GABRIEL)", "vendor": "", "type": "TCD", "ida": "2026-03-24", "volta": "2026-03-26", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 8, "dest": "CASTANHEIRA COMÉRCIO (AC INDIARA)", "vendor": "RODRIGO", "type": "TCD", "ida": "2026-03-31", "volta": "2026-04-02", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 9, "dest": "DISTRIBUIDORA DOMINGUES  (PADIAL ACOMPANHARÁ)", "vendor": "FERNANDO", "type": "TCD", "ida": "2026-04-07", "volta": "2026-04-09", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 10, "dest": "G5 CAMPINA ", "vendor": "", "type": "TCD", "ida": "2026-04-13", "volta": "2026-04-16", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 11, "dest": "FEIRA", "vendor": "FLAVIO", "type": "FEIRA", "ida": "2026-04-23", "volta": "2026-04-24", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 12, "dest": "LEO BARUERI", "vendor": "FLAVIO", "type": "COFFE EM LOJA $", "ida": "2026-04-28", "volta": "2026-04-30", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 13, "dest": "MADEIRANIT FRANCA", "vendor": "JAIR", "type": "TCD", "ida": "2026-05-05", "volta": "2026-05-07", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 14, "dest": "EDUARDO", "vendor": "EDUARDO", "type": "TCD", "ida": "2026-05-12", "volta": "2026-05-14", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 15, "dest": "ARMAZÉM DA MARCENARIA", "vendor": "RAFAEL", "type": "TCD", "ida": "2026-05-19", "volta": "2026-05-21", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 16, "dest": "GMAD SOROCABA", "vendor": "JAIR", "type": "TCD", "ida": "2026-05-26", "volta": "2026-05-28", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 17, "dest": "MARIOANO E BARGAMINHO", "vendor": "FABIANO", "type": "TCD", "ida": "2026-06-02", "volta": "2026-06-04", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 18, "dest": "GUSTAVO BARBOSA - RECIFE", "vendor": "PABLO", "type": "TCD", "ida": "2026-06-09", "volta": "2026-06-11", "voo": "S", "hotel": "S", "nota": "N", "pago": "N" },
+  { "id": 19, "dest": "GMAD COMPLOND", "vendor": "RAFAEL", "type": "TCD", "ida": "2026-06-16", "volta": "2026-06-18", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 20, "dest": "FORMOBILE", "vendor": "", "type": "TCD", "ida": "2026-06-30", "volta": "2026-07-03", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 21, "dest": "CERQUEIRA", "vendor": "ALINE", "type": "TCD", "ida": "2026-07-21", "volta": "2026-07-23", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 22, "dest": "GMAD PONTO DO MARCENEIRO", "vendor": "ALESSANDRO", "type": "TCD", "ida": "2026-07-28", "volta": "2026-07-30", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 23, "dest": "LEO AEROPORTO", "vendor": "FLAVIO", "type": "TCD", "ida": "2026-08-05", "volta": "2026-08-06", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 24, "dest": "POSSAMAI", "vendor": "ALESSANDRO", "type": "TCD", "ida": "2026-08-11", "volta": "2026-08-13", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 25, "dest": "C E D ", "vendor": "FABIANO", "type": "TCD", "ida": "2026-08-18", "volta": "2026-08-20", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 26, "dest": "VERD MAD", "vendor": "EDUARDO", "type": "TCD", "ida": "2026-08-25", "volta": "2026-08-27", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 27, "dest": "RAMUTH SJC", "vendor": "NOCE", "type": "PAV", "ida": "2026-09-01", "volta": "2026-09-03", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 28, "dest": "CASA DO MDF", "vendor": "DANIEL", "type": "TCD", "ida": "2026-09-08", "volta": "2026-09-10", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 29, "dest": "_", "vendor": "", "type": "COFFE EM LOJA $", "ida": "2026-09-15", "volta": "2026-09-17", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 30, "dest": "EDUARDO", "vendor": "EDUARDO", "type": "TCD", "ida": "2026-09-22", "volta": "2026-09-24", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 31, "dest": "LEO HORTOLANDIA", "vendor": "", "type": "COFFE EM LOJA $", "ida": "2026-09-29", "volta": "2026-10-01", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 32, "dest": "PARMA", "vendor": "", "type": "TCD", "ida": "2026-10-06", "volta": "2026-10-08", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 33, "dest": "FABIANO", "vendor": "FABIANO", "type": "TCD", "ida": "2026-10-13", "volta": "2026-10-15", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 34, "dest": "PABLO", "vendor": "PABLO", "type": "TCD", "ida": "2026-10-20", "volta": "2026-10-22", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 35, "dest": "A DEFINIR", "vendor": "", "type": "PAV", "ida": "2026-10-27", "volta": "2026-10-29", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 36, "dest": "FERNANDO", "vendor": "FERNANDO", "type": "TCD", "ida": "2026-11-10", "volta": "2026-11-12", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 37, "dest": "GMAD VITORIA DA CONQUISTA", "vendor": "ALINE", "type": "TCD", "ida": "2026-11-17", "volta": "2026-11-19", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 38, "dest": "LEO OURO VERDE CAMPINAS", "vendor": "", "type": "PAV", "ida": "2026-11-24", "volta": "2026-11-26", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" },
+  { "id": 39, "dest": "FABIANO", "vendor": "FABIANO", "type": "TCD", "ida": "2026-12-08", "volta": "2026-12-10", "voo": "N", "hotel": "N", "nota": "N", "pago": "N" }
+];
 
     let travels = rawTravels.map(t => ({
         ...t,
@@ -420,7 +476,6 @@
             if (isLogisticaCritical) rowClass = "row-critical";
             else if (isFinanceiroLate) rowClass = "row-finance-alert";
 
-            // Repare na tag data-label="" que faz a mágica acontecer no CSS do celular
             body.innerHTML += `
                 <tr class="${rowClass}">
                     <td data-label="Local"><strong>${t.dest}</strong><br><small>[${t.type || 'TCD'}]</small></td>
