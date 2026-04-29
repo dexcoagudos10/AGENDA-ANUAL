@@ -100,7 +100,7 @@
         @media (max-width: 1000px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; position: relative; padding: 20px; border-bottom: 3px solid var(--primary); z-index: 10; }
-            .main-content { margin-left: 0; padding: 15px; width: 100%; box-sizing: border-box; overflow-x: hidden; }
+            .main-content { margin-left: 0; padding: 10px; width: 100%; box-sizing: border-box; overflow-x: hidden; }
             
             .dash-fin { flex-direction: column; gap: 10px; }
             .dash-card { min-width: 100%; padding: 12px; }
@@ -112,24 +112,32 @@
             .row-inputs { flex-direction: column; gap: 0; }
             .row-inputs .form-group { width: 100%; min-width: 100%; }
 
-            /* AJUSTES DO CALENDÁRIO PARA CELULAR (ENQUADRAMENTO FORÇADO) */
+            /* AJUSTES DO CALENDÁRIO PARA CELULAR (ENQUADRAMENTO FORÇADO DEFINITIVO) */
+            .calendar-wrapper { padding-bottom: 10px; }
             .calendar-grid { 
-                /* minmax(0, 1fr) força as colunas a terem exatamente a mesma largura, ignorando o tamanho do texto */
                 grid-template-columns: repeat(7, minmax(0, 1fr)); 
+                width: 100%;
             }
-            .cal-header { padding: 6px 0; font-size: 0.65em; }
-            .cal-day { min-height: 80px; padding: 3px; overflow: hidden; }
+            .cal-header { padding: 6px 0; font-size: 0.6em; word-break: break-all; }
+            
+            .cal-day { 
+                min-width: 0; /* A MÁGICA ESTÁ AQUI: força a célula a não empurrar a tela lateralmente */
+                min-height: 80px; 
+                padding: 2px; /* Reduzi o espaçamento interno para as palavras terem mais espaço */
+                overflow: hidden; 
+            }
             .day-number { font-size: 0.85em; margin-bottom: 3px; }
             
             .event-item { 
-                font-size: 0.6em; 
-                white-space: normal; /* Permite quebra de linha */
-                word-break: break-word; /* Quebra palavras muito longas para não alargar a coluna */
-                padding: 3px; 
-                line-height: 1.2; 
+                font-size: 0.55em; 
+                white-space: normal; 
+                word-break: break-all; /* Corta a palavra no meio se for muito grande, salvando a tela */
+                padding: 3px 2px; 
+                line-height: 1.1; 
+                overflow: hidden;
             }
             .event-vendor { 
-                font-size: 0.9em; /* Mantém a proporção do vendedor legível */
+                font-size: 0.85em; 
                 margin-top: 2px; 
                 display: block; 
             }
