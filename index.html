@@ -375,7 +375,7 @@
             });
         }
         
-        if (tableSelect.options.length === 1) { // Só tem o "Todos os Meses"
+        if (tableSelect.options.length === 1) { // Só carrega se estiver vazio (apenas "Todos os Meses")
             months.forEach((m, i) => {
                 let opt = document.createElement('option');
                 opt.value = i;
@@ -515,13 +515,21 @@
 
         const tableMonthVal = document.getElementById('tableMonth').value;
         const selMonth = tableMonthVal === 'all' ? 'all' : parseInt(tableMonthVal);
+        const btnPast = document.getElementById('togglePastBtn');
+
+        // Se escolher um mês específico, esconde o botão de viagens antigas para não dar conflito lógico
+        if (selMonth !== 'all') {
+            btnPast.style.display = 'none';
+        } else {
+            btnPast.style.display = 'inline-block';
+        }
 
         let countAtrasados = 0;
         let countPendentes = 0;
         let countPagos = 0;
 
-        travels.sort((a,b) => new Date(a.ida) - new Date(b.ida)).forEach(t => {
-            
+        // FILTRAGEM ROBUSTA: Define exatamente quais viagens vão aparecer na tabela
+        let viagensParaExibir = travels.filter(t => {
             const [iY, iM, iD] = t.ida.split('-');
             const dataIda = new Date(iY, iM - 1, iD);
             dataIda.setHours(0,0,0,0);
@@ -530,12 +538,33 @@
             const dataVolta = new Date(vY, vM - 1, vD);
             dataVolta.setHours(0,0,0,0);
 
-            // Filtro de Mês da Tabela
+            const isPast = Math.floor((today - dataVolta) / 86400000) > 0;
+
+            // 1. Se escolheu um Mês Específico: Mostra só o que acontece nesse mês, e ignora o resto
             if (selMonth !== 'all') {
-                if (dataIda.getMonth() !== selMonth && dataVolta.getMonth() !== selMonth) {
-                    return; // Ignora viagens que não acontecem no mês selecionado
+                if (dataIda.getMonth() === selMonth || dataVolta.getMonth() === selMonth) {
+                    return true; 
                 }
+                return false; 
             }
+
+            // 2. Se está em "Todos os Meses": Aplica a trava do botão de Ocultar Anteriores
+            if (hidePastTrips && isPast) {
+                return false;
+            }
+
+            return true;
+        });
+
+        // RENDERIZAÇÃO: Monta a tabela apenas com as viagens aprovadas no filtro acima
+        viagensParaExibir.sort((a,b) => new Date(a.ida) - new Date(b.ida)).forEach(t => {
+            const [iY, iM, iD] = t.ida.split('-');
+            const dataIda = new Date(iY, iM - 1, iD);
+            dataIda.setHours(0,0,0,0);
+            
+            const [vY, vM, vD] = t.volta.split('-');
+            const dataVolta = new Date(vY, vM - 1, vD);
+            dataVolta.setHours(0,0,0,0);
 
             const diffLogistica = (dataIda - today) / 86400000;
             const isLogisticaCritical = diffLogistica >= 0 && diffLogistica < 30 && (t.voo==='N' || t.hotel==='N');
@@ -560,12 +589,6 @@
                 }
             } else {
                 statusFinanceiro = "<span style='color:#7f8c8d; font-size: 0.9em;'>Aguardando Evento</span>";
-            }
-
-            // Ocultar viagens passadas, mas se o usuário filtrou um mês específico do passado, 
-            // assumimos que ele quer ver as viagens daquele mês, ignorando a trava de "ocultar".
-            if (hidePastTrips && isPast && selMonth === 'all') {
-                return;
             }
 
             let rowClass = "";
@@ -611,6 +634,7 @@
                 </tr>`;
         });
 
+        // Atualiza o painel de finanças com as informações apenas do que está aparecendo na tabela
         document.getElementById('count-atrasados').innerText = countAtrasados;
         document.getElementById('count-pendentes').innerText = countPendentes;
         document.getElementById('count-pagos').innerText = countPagos;
